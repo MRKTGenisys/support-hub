@@ -17,6 +17,21 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const publicServerURL =
   process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001";
+const publicFrontendURL =
+  process.env.PAYLOAD_PUBLIC_FRONTEND_URL ||
+  process.env.VITE_PUBLIC_SITE_URL ||
+  "";
+const trustedOrigins = Array.from(
+  new Set(
+    [
+      publicServerURL,
+      publicFrontendURL,
+      "http://localhost:3001",
+      "http://localhost:5173",
+      "https://rosybrown-mouse-783731.hostingersite.com",
+    ].filter(Boolean)
+  )
+);
 
 export default buildConfig({
   admin: {
@@ -35,8 +50,8 @@ export default buildConfig({
     ResourceFiles,
     Media,
   ],
-  cors: [publicServerURL, "http://localhost:3001", "http://localhost:5173"],
-  csrf: [publicServerURL, "http://localhost:3001", "http://localhost:5173"],
+  cors: trustedOrigins,
+  csrf: trustedOrigins,
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URI || "file:./cms/payload.sqlite",

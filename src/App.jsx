@@ -47,6 +47,7 @@ const supportHubPath = "/support-hub";
 const articlePathPrefix = "/support-hub/articles";
 const supportArticlePathPrefix = "/support";
 const categoryPathPrefix = "/support-hub/categories";
+const payloadApiBaseUrl = import.meta.env.VITE_PAYLOAD_API_URL?.replace(/\/$/, "") || "";
 const contactSupportUrl = "https://www.genisys.com.au/contact/";
 const supportTicketUrl = "https://my.genisys.com.au/login";
 const remoteSupportUrl = "https://genisys.support/remotesupport.html";
@@ -675,7 +676,7 @@ function normaliseResource(resource) {
     resource?.fileUpload && typeof resource.fileUpload === "object"
       ? resource.fileUpload
       : null;
-  const fileUrl = fileUpload?.url || "";
+  const fileUrl = resolvePayloadAssetUrl(fileUpload?.url || "");
   const fileName = fileUpload?.filename || resource?.fileName || "";
   const fileSize = formatFileSize(fileUpload?.filesize || resource?.filesize);
 
@@ -702,7 +703,8 @@ function normaliseResource(resource) {
 }
 
 function buildPayloadUrl(path, params = {}) {
-  const url = new URL(path, window.location.origin);
+  const baseUrl = payloadApiBaseUrl || window.location.origin;
+  const url = new URL(path, baseUrl);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -710,7 +712,15 @@ function buildPayloadUrl(path, params = {}) {
     }
   });
 
-  return `${url.pathname}${url.search}`;
+  return payloadApiBaseUrl ? url.toString() : `${url.pathname}${url.search}`;
+}
+
+function resolvePayloadAssetUrl(path) {
+  if (!path || /^https?:\/\//i.test(path)) {
+    return path || "";
+  }
+
+  return payloadApiBaseUrl ? `${payloadApiBaseUrl}${path}` : path;
 }
 
 async function fetchPayloadJSON(path, params) {

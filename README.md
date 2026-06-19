@@ -42,6 +42,7 @@ Payload CMS runs on `http://localhost:3001/admin`.
 ```bash
 npm run build
 npm run build:cms
+npm run start:cms
 npm run typecheck
 npm run payload:generate:importmap
 npm run generate:static-support-data
@@ -56,6 +57,8 @@ Vite frontend when the live Payload API is not available.
 ```bash
 PAYLOAD_SECRET=replace-with-a-long-random-secret
 PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3001
+PAYLOAD_PUBLIC_FRONTEND_URL=https://rosybrown-mouse-783731.hostingersite.com
+VITE_PAYLOAD_API_URL=
 DATABASE_URI=file:./cms/payload.sqlite
 ```
 
@@ -81,6 +84,38 @@ such as `/support-hub/articles` and `/support-hub/articles/example-slug`.
 The required `.htaccess` file lives in `public/.htaccess` and is copied into
 `dist/.htaccess` during `npm run build`. Make sure hidden files are included
 when uploading the `dist` folder to Hostinger.
+
+## Live Payload CMS on Hostinger
+
+The public website and Payload CMS should be deployed as two Hostinger apps.
+
+Static frontend app:
+
+- Framework preset: `Vite`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment variable: `VITE_PAYLOAD_API_URL=https://your-cms-hostinger-url`
+
+Node.js Payload app:
+
+- Framework preset: `Next.js`
+- Build command: `npm run build:cms`
+- Start command: `npm run start:cms`
+- Root directory: `./`
+- Node version: `22.x`
+- Environment variables:
+  - `PAYLOAD_SECRET`
+  - `PAYLOAD_PUBLIC_SERVER_URL=https://your-cms-hostinger-url`
+  - `PAYLOAD_PUBLIC_FRONTEND_URL=https://rosybrown-mouse-783731.hostingersite.com`
+  - `DATABASE_URI=file:./cms/payload.sqlite`
+
+After the Payload app is live, the admin path will be:
+
+`https://your-cms-hostinger-url/admin`
+
+For long-term production use, prefer a database-backed Payload deployment with
+regular backups. SQLite is acceptable for a small managed CMS only if the
+hosting filesystem is persistent and backed up.
 
 ## GitHub Checklist
 

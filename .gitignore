@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+.next
+coverage
+tsconfig.tsbuildinfo
+
+# Payload local output
+cms/payload-types.ts
+cms/payload.sqlite
+cms/payload.sqlite-*
+cms/uploads
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+.DS_Store

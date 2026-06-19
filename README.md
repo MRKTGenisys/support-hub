@@ -44,8 +44,12 @@ npm run build
 npm run build:cms
 npm run typecheck
 npm run payload:generate:importmap
+npm run generate:static-support-data
 npm run seed:support-hub
 ```
+
+`generate:static-support-data` rebuilds the static article fallback used by the
+Vite frontend when the live Payload API is not available.
 
 ## Environment Variables
 
@@ -56,6 +60,18 @@ DATABASE_URI=file:./cms/payload.sqlite
 ```
 
 Do not commit real `.env` files, local SQLite databases, uploaded files, build output or `node_modules`.
+
+## Vercel Deployment
+
+This project deploys the public Support Hub as a Vite static frontend.
+
+- Framework preset: `Vite`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Root directory: `./`
+
+These settings are also captured in `vercel.json`. Payload CMS/admin/API should
+be deployed separately if live CMS editing is required in production.
 
 ## GitHub Checklist
 

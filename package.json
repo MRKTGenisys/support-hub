@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "payload": "payload",
     "payload:generate:importmap": "payload generate:importmap",
+    "generate:static-support-data": "node scripts/generate-static-support-data.mjs",
     "seed:support-hub": "node scripts/seed-support-hub.mjs",
     "preview": "vite preview"
   },

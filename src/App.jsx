@@ -37,6 +37,11 @@ import {
   resourceCategoryCards,
   resourceCategoryFilters,
 } from "./resourceLibraryData";
+import {
+  staticArticles,
+  staticCategories,
+  staticPdfResources,
+} from "./staticSupportData";
 
 const supportHubPath = "/support-hub";
 const articlePathPrefix = "/support-hub/articles";
@@ -375,6 +380,14 @@ const fallbackArticles = [
   },
 ];
 
+const fallbackContentCategories = staticCategories.length
+  ? staticCategories
+  : fallbackCategories;
+const fallbackContentArticles = staticArticles.length ? staticArticles : fallbackArticles;
+const fallbackContentResources = staticPdfResources.length
+  ? staticPdfResources
+  : fallbackPdfResources;
+
 function slugify(value) {
   return String(value || "")
     .toLowerCase()
@@ -595,7 +608,7 @@ function normaliseArticle(article) {
   const category =
     typeof article?.category === "object" && article.category
       ? normaliseCategory(article.category)
-      : fallbackCategories.find((item) => item.title === article?.category) ||
+      : fallbackContentCategories.find((item) => item.title === article?.category) ||
         normaliseCategory({ title: article?.category || "Knowledge Base" });
   const title = article?.title || "Untitled article";
   const slug = article?.slug || slugify(title);
@@ -714,11 +727,11 @@ async function fetchPayloadJSON(path, params) {
 
 function useKnowledgeData() {
   const [state, setState] = useState({
-    articles: fallbackArticles.map(normaliseArticle),
-    categories: fallbackCategories.map(normaliseCategory),
+    articles: fallbackContentArticles.map(normaliseArticle),
+    categories: fallbackContentCategories.map(normaliseCategory),
     error: null,
     loading: true,
-    resources: fallbackPdfResources.map(normaliseResource),
+    resources: fallbackContentResources.map(normaliseResource),
     settings: defaultSettings,
   });
 
@@ -768,15 +781,15 @@ function useKnowledgeData() {
           : [];
 
         setState({
-          articles: articles.length ? articles : fallbackArticles.map(normaliseArticle),
+          articles: articles.length ? articles : fallbackContentArticles.map(normaliseArticle),
           categories: categories.length
             ? categories
-            : fallbackCategories.map(normaliseCategory),
+            : fallbackContentCategories.map(normaliseCategory),
           error: null,
           loading: false,
           resources: resources.length
             ? resources
-            : fallbackPdfResources.map(normaliseResource),
+            : fallbackContentResources.map(normaliseResource),
           settings: {
             ...defaultSettings,
             ...settings,
@@ -2060,7 +2073,7 @@ function ResourceHubTemplate({ resources }) {
     () =>
       resources?.length
         ? resources
-        : fallbackPdfResources.map(normaliseResource),
+        : fallbackContentResources.map(normaliseResource),
     [resources],
   );
 

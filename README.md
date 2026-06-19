@@ -73,6 +73,15 @@ This project deploys the public Support Hub as a Vite static frontend.
 These settings are also captured in `vercel.json`. Payload CMS/admin/API should
 be deployed separately if live CMS editing is required in production.
 
+## Hostinger Deployment
+
+Hostinger static hosting needs Apache rewrite fallback support for React routes
+such as `/support-hub/articles` and `/support-hub/articles/example-slug`.
+
+The required `.htaccess` file lives in `public/.htaccess` and is copied into
+`dist/.htaccess` during `npm run build`. Make sure hidden files are included
+when uploading the `dist` folder to Hostinger.
+
 ## GitHub Checklist
 
 1. Run `npm install`.

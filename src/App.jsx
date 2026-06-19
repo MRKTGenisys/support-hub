@@ -1312,6 +1312,21 @@ const fallbackSystemStatusRows = [
   { id: "genisys-teams-calling", name: "Genisys Teams Calling", status: "unknown" },
 ];
 
+const statusPageSummaryUrl = "https://status.genisys.com.au/api/v2/summary.json";
+const statusPageUrl = "https://status.genisys.com.au/";
+const preferredStatusComponentNames = [
+  "Genisys Support Web Chat",
+  "Genisys Phone Support",
+  "Network Connectivity (Australia)",
+  "Telephony",
+  "GoSIP VoIP Services",
+  "Genisys Teams Calling",
+  "Hosted Infrastructure Services",
+  "Backup as a Service (BaaS)",
+  "Disaster Recovery as a Service (DRaaS)",
+  "Desktop & Applications (DAaaS)",
+];
+
 const systemStatusStyleByStatus = {
   operational: {
     dot: "bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.14),0_0_18px_rgba(52,211,153,0.5)]",
@@ -1424,6 +1439,78 @@ function normaliseSystemStatusPayload(payload) {
   };
 }
 
+function normaliseStatusPageComponent(component) {
+  return {
+    id: component?.id || slugify(component?.name),
+    name: component?.name || "Status component",
+    status: component?.status || "unknown",
+  };
+}
+
+function chooseStatusPageComponents(components = []) {
+  const selected = preferredStatusComponentNames
+    .map((name) => components.find((component) => component?.name === name))
+    .filter(Boolean);
+
+  if (selected.length >= 6) {
+    return selected.slice(0, 6).map(normaliseStatusPageComponent);
+  }
+
+  const selectedIds = new Set(selected.map((component) => component.id));
+  const remaining = components
+    .filter((component) => component?.name && !selectedIds.has(component.id))
+    .sort((a, b) => Number(a?.position || 0) - Number(b?.position || 0));
+
+  return [...selected, ...remaining]
+    .slice(0, 6)
+    .map(normaliseStatusPageComponent);
+}
+
+function normaliseStatusPageSummary(data) {
+  const rows = chooseStatusPageComponents(
+    Array.isArray(data?.components) ? data.components : [],
+  );
+
+  return {
+    incidents: Array.isArray(data?.incidents) ? data.incidents.length : 0,
+    pageURL: data?.page?.url || statusPageUrl,
+    rows: rows.length ? rows : fallbackSystemStatusRows,
+    scheduledMaintenances: Array.isArray(data?.scheduled_maintenances)
+      ? data.scheduled_maintenances.length
+      : 0,
+    source: "live",
+    status: {
+      description: data?.status?.description || "Status available",
+      indicator: data?.status?.indicator || "unknown",
+    },
+    updatedAt: data?.page?.updated_at || "",
+  };
+}
+
+async function fetchStatusPageSummary() {
+  const response = await fetch(statusPageSummaryUrl, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Status feed returned ${response.status}`);
+  }
+
+  return normaliseStatusPageSummary(await response.json());
+}
+
+async function fetchSystemStatus() {
+  try {
+    return await fetchStatusPageSummary();
+  } catch (directError) {
+    try {
+      return normaliseSystemStatusPayload(await fetchPayloadJSON("/api/system-status"));
+    } catch {
+      throw directError;
+    }
+  }
+}
+
 function useSystemStatus() {
   const [state, setState] = useState(() => ({
     ...normaliseSystemStatusPayload(null),
@@ -1436,14 +1523,14 @@ function useSystemStatus() {
 
     async function loadStatus() {
       try {
-        const data = await fetchPayloadJSON("/api/system-status");
+        const data = await fetchSystemStatus();
 
         if (!isMounted) {
           return;
         }
 
         setState({
-          ...normaliseSystemStatusPayload(data),
+          ...data,
           error: null,
           loading: false,
         });

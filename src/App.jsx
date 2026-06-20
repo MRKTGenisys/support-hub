@@ -3161,6 +3161,25 @@ function NotFound() {
   );
 }
 
+function ArticleLoading() {
+  return (
+    <main className="mx-auto max-w-[980px] px-4 py-20 text-center sm:px-6 lg:px-8">
+      <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-aqua/25 text-deep-teal">
+        <BookOpen className="h-8 w-8 animate-pulse" aria-hidden="true" />
+      </span>
+      <h1 className="mt-6 text-4xl font-black text-navy">Loading article</h1>
+      <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600">
+        Loading support hub content from Payload...
+      </p>
+      <div className="mx-auto mt-10 max-w-2xl rounded-lg border border-aqua/30 bg-white p-6 shadow-soft">
+        <div className="h-4 rounded-full bg-slate-100" />
+        <div className="mt-4 h-4 rounded-full bg-slate-100" />
+        <div className="mt-4 h-4 w-2/3 rounded-full bg-slate-100" />
+      </div>
+    </main>
+  );
+}
+
 export default function App() {
   const { articles, categories, error, loading, resources, settings } =
     useKnowledgeData();
@@ -3207,6 +3226,10 @@ export default function App() {
     if (articleSlug) {
       if (articleSlug === "downloads-resources-overview") {
         return <ResourceHubTemplate resources={resources} />;
+      }
+
+      if (!article && loading) {
+        return <ArticleLoading />;
       }
 
       return <ArticlePage article={article} categories={categories} />;

@@ -47,7 +47,14 @@ const supportHubPath = "/support-hub";
 const articlePathPrefix = "/support-hub/articles";
 const supportArticlePathPrefix = "/support";
 const categoryPathPrefix = "/support-hub/categories";
-const payloadApiBaseUrl = import.meta.env.VITE_PAYLOAD_API_URL?.replace(/\/$/, "") || "";
+const productionPayloadApiBaseUrl = "https://genisys-support-hub-cms.vercel.app";
+const legacyPayloadApiBaseUrls = new Set(["https://aquamarine-dolphin-277499.hostingersite.com"]);
+const configuredPayloadApiBaseUrl = import.meta.env.VITE_PAYLOAD_API_URL?.replace(/\/$/, "") || "";
+const payloadApiBaseUrl =
+  legacyPayloadApiBaseUrls.has(configuredPayloadApiBaseUrl) ||
+  (!configuredPayloadApiBaseUrl && import.meta.env.PROD)
+    ? productionPayloadApiBaseUrl
+    : configuredPayloadApiBaseUrl;
 const contactSupportUrl = "https://www.genisys.com.au/contact/";
 const supportTicketUrl = "https://my.genisys.com.au/login";
 const remoteSupportUrl = "https://genisys.support/remotesupport.html";

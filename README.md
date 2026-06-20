@@ -58,7 +58,7 @@ Vite frontend when the live Payload API is not available.
 PAYLOAD_SECRET=replace-with-a-long-random-secret
 PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3001
 PAYLOAD_PUBLIC_FRONTEND_URL=https://rosybrown-mouse-783731.hostingersite.com
-VITE_PAYLOAD_API_URL=
+VITE_PAYLOAD_API_URL=https://genisys-support-hub-cms.vercel.app
 DATABASE_URI=file:./cms/payload.sqlite
 ```
 
@@ -85,18 +85,19 @@ The required `.htaccess` file lives in `public/.htaccess` and is copied into
 `dist/.htaccess` during `npm run build`. Make sure hidden files are included
 when uploading the `dist` folder to Hostinger.
 
-## Live Payload CMS on Hostinger
+## Live Payload CMS on Vercel
 
-The public website and Payload CMS should be deployed as two Hostinger apps.
+The public website is deployed as a Vite static frontend. Payload CMS is
+deployed separately on Vercel.
 
 Static frontend app:
 
 - Framework preset: `Vite`
 - Build command: `npm run build`
 - Output directory: `dist`
-- Environment variable: `VITE_PAYLOAD_API_URL=https://your-cms-hostinger-url`
+- Environment variable: `VITE_PAYLOAD_API_URL=https://genisys-support-hub-cms.vercel.app`
 
-Node.js Payload app:
+Payload CMS app:
 
 - Framework preset: `Next.js`
 - Build command: `npm run build:cms`
@@ -105,17 +106,25 @@ Node.js Payload app:
 - Node version: `22.x`
 - Environment variables:
   - `PAYLOAD_SECRET`
-  - `PAYLOAD_PUBLIC_SERVER_URL=https://your-cms-hostinger-url`
+  - `PAYLOAD_PUBLIC_SERVER_URL=https://genisys-support-hub-cms.vercel.app`
   - `PAYLOAD_PUBLIC_FRONTEND_URL=https://rosybrown-mouse-783731.hostingersite.com`
-  - `DATABASE_URI=file:./cms/payload.sqlite`
+  - `DATABASE_URI`
 
-After the Payload app is live, the admin path will be:
+The live Payload admin path is:
 
-`https://your-cms-hostinger-url/admin`
+`https://genisys-support-hub-cms.vercel.app/admin`
 
-For long-term production use, prefer a database-backed Payload deployment with
-regular backups. SQLite is acceptable for a small managed CMS only if the
-hosting filesystem is persistent and backed up.
+If new Payload articles do not appear on the public frontend, confirm the
+frontend deployment is built with:
+
+```bash
+VITE_PAYLOAD_API_URL=https://genisys-support-hub-cms.vercel.app
+```
+
+The generated Vite bundle should route Payload requests to
+`genisys-support-hub-cms.vercel.app`. The older Hostinger CMS URL is only kept
+as a legacy safeguard so stale deployment settings are redirected to the Vercel
+CMS.
 
 ## GitHub Checklist
 
